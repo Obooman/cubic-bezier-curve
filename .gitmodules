@@ -1,0 +1,3 @@
+[submodule "bezier-easing"]
+	path = bezier-easing
+	url = https://github.com/Obooman/bezier-easing.git
