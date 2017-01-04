@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Get Cubic Bezier Curve</title>
+	<style>
+		body{
+			margin: 0;
+			text-align: center;
+			font-family: 'Courier'
+		}
+	</style>
+</head>
+<body>
+	<canvas width="600" height="600">Your browser doesn't support canvas.</canvas>
+	<br>
+	change stroke speed:<input type="range" id='tRange' min="1" max="20">
+	<button id="repeat" disabled>Repeat</button><br>
+	you can refresh current page to change the points' position
+	<script>
+		var oCanvas = document.querySelector('canvas');
+		var oRange = document.querySelector('#tRange');
+		var repeat = document.querySelector('#repeat');
+
+		var ctx = oCanvas.getContext('2d');
+			ctx.font = '12px Courier'
+
+		var t = 0;
+		var tSpeed = 0.005;
+
+		oRange.value = tSpeed*1000;
+
+		oRange.oninput = function(){
+			tSpeed = oRange.value/1000;
+		}
+
+		var points = ([
+			{x:rnd(100,300),y:rnd(100,300)},
+			{x:rnd(300,600),y:rnd(100,300)},
+			{x:rnd(100,300),y:rnd(300,600)},
+			{x:rnd(300,600),y:rnd(300,600)}
+		]).sort(function(){ return Math.random() - 0.5 });
+
+		
+		function draw(time){
+			console.log(time);
+
+			repeat.setAttribute('disabled','1');
+			ctx.clearRect(0,0,oCanvas.width,oCanvas.height)
+
+			points.forEach(function(point,index){
+				var {
+					x,y
+				} = point;
+
+				ctx.beginPath();
+				ctx.arc(x,y,4,0,2*Math.PI,false)
+				ctx.fillText('P' + index,x,y)
+
+				ctx.fill();
+			})
+
+			ctx.beginPath();
+
+			ctx.moveTo(points[0].x,points[0].y);
+			ctx.bezierCurveTo(
+				points[1].x,points[1].y,
+				points[2].x,points[2].y,
+				points[3].x,points[3].y
+			)
+
+			ctx.strokeStyle = '#50E3C2';
+			ctx.stroke();
+
+			// B(t) = P0(1-t)³ + 3P1t(1-t)² + 3P2t²(1-t) + P3t³
+			ctx.beginPath();
+			ctx.arc(
+				getBezierCoord(points[0].x,points[1].x,points[2].x,points[3].x),
+				getBezierCoord(points[0].y,points[1].y,points[2].y,points[3].y),
+				4,0,2*Math.PI,false);
+			ctx.fill();
+
+			t += tSpeed;
+
+			if( t <= 1 ){
+				requestAnimationFrame(draw);
+			} else {
+				repeat.removeAttribute('disabled');
+			}
+		}
+
+		draw();
+
+		repeat.onclick = function(){
+			t=0;
+			draw();
+		}
+
+		function rnd(n,m){
+			return parseInt(Math.random()*(m-n)+n);
+		}
+
+		function getBezierCoord(p1,p2,p3,p4){
+			return (
+				p1 * Math.pow(1 - t,3)
+				+ 3 * p2 * t * Math.pow(1 - t,2) 
+				+ 3 * p3 * Math.pow(t,2)*(1 - t)
+				+ p4 * Math.pow(t,3)
+			)
+		}
+	</script>
+</body>
+</html>
