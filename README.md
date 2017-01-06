@@ -1,8 +1,6 @@
 ### Cubic Bezier Curve
 This repo aims at understanding bezier curve deeply,both in bezier curve path animation and cubic-bezier-based timing function.
 
-TODO:
-
 [Main Page Here](https://obooman.github.io/cubic-bezier-curve/)
 
 * [How we get bezier curve](https://obooman.github.io/cubic-bezier-curve/demos/get-bezier-curve.html)
