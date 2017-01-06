@@ -34,10 +34,6 @@
 			border-radius: 3px;
 		}
 	</style>
-	<script>
-		var module = {};
-		module.exports = function(){};
-	</script>
 </head>
 <body>
 	<div id="box">
@@ -47,12 +43,10 @@
 	</div><br>
 	You can change the bezier curve by dragging control point. <br>
 	current bezier curve expression: <span id="bezier"></span>
-	<script src="../bezier-easing/src/index.js"></script>
 	<script>
 		var oBox = document.querySelector('#box');
 		var controllerOne = document.querySelector('.controller-one');
 		var controllerTwo = document.querySelector('.controller-two');
-		var bezier = module.exports; // just for simple use.
 		var bezierExpression = document.querySelector('#bezier');
 
 		var oCanvas = document.querySelector('canvas');
