@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Cubic bezier curve generator</title>
+	<title>Using cubic bezier path describe timing function</title>
 	<style>
 		body{
 			margin: 0;
@@ -33,7 +33,14 @@
 			padding: 5px 10px;
 			border-radius: 3px;
 		}
+
+		.animate-block{
+			width: 10px;
+		}
 	</style>
+	<script>
+		var module = {};
+	</script>
 </head>
 <body>
 	<div id="box">
@@ -41,16 +48,25 @@
 		<div class="controller-one" data-index=0></div>
 		<div class="controller-two" data-index=1></div>
 	</div><br>
+	change stroke speed:<input type="range" id='tRange' min="1" max="20"><button id="rerun">reRun</button><br>
 	You can change the bezier curve by dragging control point. <br>
 	current bezier curve expression: <span id="bezier"></span>
+	<script src="../bezier-easing/src/index.js"></script>
 	<script>
 		var oBox = document.querySelector('#box');
 		var controllerOne = document.querySelector('.controller-one');
 		var controllerTwo = document.querySelector('.controller-two');
 		var bezierExpression = document.querySelector('#bezier');
+		var bezier = module.exports;
+		var rerun = document.querySelector('#rerun');
+		var oRange = document.querySelector('#tRange');
 
 		var oCanvas = document.querySelector('canvas');
 		var ctx = oCanvas.getContext('2d');
+		var canModify = true;
+		var t = 0;
+		var tSpeed = 0.005;
+		oRange.value = tSpeed*1000;
 
 		var pointOne = {
 			x:rnd(300,500),
@@ -74,6 +90,8 @@
 			}
 
 			domElement.addEventListener('mousedown',function({clientX,clientY}){
+
+				if( !canModify ) return;
 
 				var disX = clientX - domElement.offsetLeft;
 				var disY = clientY - domElement.offsetTop;
@@ -164,7 +182,43 @@
 			})`
 		}
 
-		redraw();
+		function launchAnimation(){
+			canModify = false;
+			rerun.setAttribute('disabled','0');
+
+			var easing = bezier(
+				(pointOne.x - 100)/400,
+				(500 - pointOne.y)/400,
+				(pointTwo.x - 100)/400,
+				(500 - pointTwo.y)/400
+			);
+
+			redraw();
+
+			ctx.beginPath();
+			ctx.arc(100+t*400,500 - 400*easing(t),8,0,Math.PI*2,false);
+			ctx.fill();
+
+			t += tSpeed;
+
+			if( t < 1+tSpeed ){
+				requestAnimationFrame(launchAnimation)
+			} else {
+				canModify = true;
+				rerun.removeAttribute('disabled');
+			}
+		}
+
+		rerun.onclick = function(){
+			t = 0;
+			launchAnimation();
+		}
+
+		oRange.oninput = function(){
+			tSpeed = oRange.value/1000;
+		}
+
+		launchAnimation()
 
 		function rnd(n,m){
 			return parseInt(Math.random()*(m-n)+n);
