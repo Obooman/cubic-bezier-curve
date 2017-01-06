@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+		body{
+			margin: 0;
+			text-align: center;
+			font-family: 'Courier'
+		}
+
+		[class^=controller-]{
+			width: 10px;
+			height: 10px;
+			border-radius: 50%;
+			background-color: #50E3C2;
+			position: absolute;
+			left: 0;
+			top: 0;
+			transform:translate(-50%,-50%);
+		}
+
+		#box{
+			display: inline-block;
+			position: relative;
+		}
+
+		#bezier{
+			display: inline-block;
+			background-color: #50E3C2;
+			color:white;
+			padding: 5px 10px;
+			border-radius: 3px;
+		}
+	</style>
+	<script>
+		var module = {};
+		module.exports = function(){};
+	</script>
+</head>
+<body>
+	<div id="box">
+		<canvas width="600" height="600">Your browser doesn't support canvas.</canvas>
+		<div class="controller-one" data-index=0></div>
+		<div class="controller-two" data-index=1></div>
+	</div><br>
+	You can change the bezier curve by dragging control point. <br>
+	current bezier curve expression: <span id="bezier"></span>
+	<script src="../bezier-easing/src/index.js"></script>
+	<script>
+		var oBox = document.querySelector('#box');
+		var controllerOne = document.querySelector('.controller-one');
+		var controllerTwo = document.querySelector('.controller-two');
+		var bezier = module.exports; // just for simple use.
+		var bezierExpression = document.querySelector('#bezier');
+
+		var oCanvas = document.querySelector('canvas');
+		var ctx = oCanvas.getContext('2d');
+
+		var pointOne = {
+			x:rnd(300,500),
+			y:rnd(300,500)
+		}
+
+		var pointTwo = {
+			x:rnd(100,300),
+			y:rnd(100,300)
+		}
+
+		controllerOne.style.left = pointOne.x + 'px';
+		controllerOne.style.top = pointOne.y + 'px';
+		controllerTwo.style.left = pointTwo.x + 'px';
+		controllerTwo.style.top = pointTwo.y + 'px';
+
+		function draggable(domElement){
+
+			if( domElement instanceof Array ){
+				domElement.forEach(o => draggable(o));return;
+			}
+
+			domElement.addEventListener('mousedown',function({clientX,clientY}){
+
+				var disX = clientX - domElement.offsetLeft;
+				var disY = clientY - domElement.offsetTop;
+
+				document.addEventListener('mousemove',fnMove,false);
+				document.addEventListener('mouseup',fnUp,false);
+
+				function fnMove(ev){
+					ev.preventDefault();
+
+					var {
+						clientX,
+						clientY
+					} = ev;
+
+					var targetX = clientX - oBox.offsetLeft;
+					var targetY = clientY - oBox.offsetTop;
+
+					if( targetX < 100 ) targetX = 100;
+					if( targetX > 500 ) targetX = 500;
+					if( targetY < 0 ) targetY = 0;
+					if( targetY > 600 ) targetY = 600;
+
+					if( domElement.dataset.index == 0 ){
+						pointOne.x = targetX;
+						pointOne.y = targetY;
+					} else {
+						pointTwo.x = targetX;
+						pointTwo.y = targetY;
+					}
+
+					domElement.style.left = targetX + 'px';
+					domElement.style.top = targetY + 'px';
+
+					redraw();
+				}
+
+				function fnUp(){
+					document.removeEventListener('mousemove',fnMove,false);
+					document.removeEventListener('mouseup',fnUp,false);
+				}
+			},true)
+		}
+
+		draggable([controllerOne,controllerTwo]);
+
+		function redraw(){
+			ctx.clearRect(0,0,oCanvas.width,oCanvas.height);
+
+			ctx.beginPath();
+
+			ctx.strokeStyle = `rgba(0,0,0,0.1)`;
+			ctx.fillStyle = `rgba(0,0,0,0.1)`;
+
+			ctx.arc(100,500,5,0,Math.PI*2,false)
+			ctx.moveTo(500,100);
+			ctx.arc(500,100,5,0,Math.PI*2,false)
+			ctx.fill();
+			ctx.strokeRect(100,100,400,400);
+
+			ctx.moveTo(100,500);
+			ctx.lineTo(pointOne.x,pointOne.y);
+
+			ctx.moveTo(500,100);
+			ctx.lineTo(pointTwo.x,pointTwo.y);
+
+			ctx.stroke();
+
+			ctx.beginPath();
+
+			ctx.strokeStyle = `#50E3C2`;
+			ctx.moveTo(100,500);
+			ctx.bezierCurveTo(pointOne.x,pointOne.y,pointTwo.x,pointTwo.y,500,100);
+			ctx.stroke();
+
+			changeValue();
+		}
+
+		function changeValue(){
+			bezierExpression.innerHTML = `cubic-bezier(${
+				((pointOne.x-100)/400).toFixed(2)
+			},${
+				((500 - pointOne.y)/400).toFixed(2)
+			},${
+				((pointTwo.x-100)/400).toFixed(2)
+			},${
+				((500 - pointTwo.y)/400).toFixed(2)
+			})`
+		}
+
+		redraw();
+
+		function rnd(n,m){
+			return parseInt(Math.random()*(m-n)+n);
+		}
+	</script>
+</body>
+</html>

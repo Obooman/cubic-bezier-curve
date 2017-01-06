@@ -14,10 +14,7 @@
 <body>
 	<canvas width="600" height="600">Your browser doesn't support canvas.</canvas>
 	<br>
-	<input type="text" placeholder="cubic-bezier(.2,.3,.9.1)" id="cubicBezier"><br>
-	change stroke speed:<input type="range" id='tRange' min="1" max="20">
-	<button id="repeat" disabled>Repeat</button><br>
-	you can refresh current page to change the points' position
+	<input type="text" placeholder="cubic-bezier(.2,.3,.9.1)" id="cubicBezier" value="cubic-bezier(0.2,.2,.3,.4)"><br>
 	<script>
 		var oCanvas = document.querySelector('canvas');
 		var oRange = document.querySelector('#tRange');
@@ -39,15 +36,37 @@
 			ctx.font = '12px Courier'
 
 		ctx.strokeRect(100,100,400,400);
-		ctx.arc(100,500,4,0,2*Math.PI,false);
-		ctx.moveTo(500,100);
-		ctx.arc(500,100,4,0,2*Math.PI,false);
 
 		ctx.fill();
 
 		bezier.onkeydown = function({keyCode}){
 			if( keyCode == 13 ){
-				
+				ctx.clearRect(101,101,398,398);
+				bezier.value.replace(/\(.+\)/,function(value){
+					var targetData = (value.substring(1,value.length - 1).trim()).split(',');
+
+					targetData = targetData.map(function(data){
+
+						if( data > 1 || data < 0 ){
+							alert('Invalid Param!');
+							return;
+						}
+
+						return data * 400 + 100;
+					})
+
+					ctx.beginPath();
+					ctx.moveTo(100,500);
+
+					ctx.bezierCurveTo(
+						targetData[0],
+						targetData[1],
+						targetData[2],
+						targetData[3],500,100
+					)
+
+					ctx.stroke();
+				})
 			}
 		}
 
