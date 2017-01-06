@@ -92,7 +92,7 @@
 
 			t += tSpeed;
 
-			if( t <= 1 ){
+			if( t <= 1 + tSpeed ){
 				requestAnimationFrame(draw);
 			} else {
 				repeat.removeAttribute('disabled');

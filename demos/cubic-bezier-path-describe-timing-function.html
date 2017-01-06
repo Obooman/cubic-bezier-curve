@@ -63,10 +63,23 @@
 
 		var oCanvas = document.querySelector('canvas');
 		var ctx = oCanvas.getContext('2d');
+
+		var moveShades = [];
 		var canModify = true;
 		var t = 0;
 		var tSpeed = 0.005;
 		oRange.value = tSpeed*1000;
+
+		window.requesetAnimFrame = function () {
+			return window.requesetAnimationFrame ||
+				window.webkitRequestAnimationFrame ||
+				window.mozRequestAnimationFrame ||
+				window.oRequestAnimationFrame ||
+				window.msRequestAnimationFrame ||
+				function (fn) {
+					window.setTimeout(fn, 1000/60);
+				};
+		}();
 
 		var pointOne = {
 			x:rnd(300,500),
@@ -146,6 +159,14 @@
 			ctx.strokeStyle = `rgba(0,0,0,0.1)`;
 			ctx.fillStyle = `rgba(0,0,0,0.1)`;
 
+			moveShades.forEach(function(point){
+				ctx.beginPath();
+				ctx.arc(point.x,point.y,10,0,2*Math.PI,false);
+				ctx.fill();
+			})
+
+			ctx.beginPath();
+
 			ctx.arc(100,500,5,0,Math.PI*2,false)
 			ctx.moveTo(500,100);
 			ctx.arc(500,100,5,0,Math.PI*2,false)
@@ -193,7 +214,20 @@
 				(500 - pointTwo.y)/400
 			);
 
+			if( parseInt((t/tSpeed))%8 == 0 ){
+				moveShades.push({
+					x:easing(t)*400 + 100,
+					y:20
+				})
+			}
+
 			redraw();
+
+			ctx.beginPath();
+
+			ctx.fillStyle = '#50E3C2';
+			ctx.arc(easing(t)*400 + 100,20,10,0,2*Math.PI,false);
+			ctx.fill();
 
 			ctx.beginPath();
 			ctx.arc(100+t*400,500 - 400*easing(t),8,0,Math.PI*2,false);
@@ -201,7 +235,7 @@
 
 			t += tSpeed;
 
-			if( t < 1+tSpeed ){
+			if( t < 1 + tSpeed ){
 				requestAnimationFrame(launchAnimation)
 			} else {
 				canModify = true;
@@ -212,6 +246,7 @@
 		rerun.onclick = function(){
 			t = 0;
 			launchAnimation();
+			moveShades = [];
 		}
 
 		oRange.oninput = function(){

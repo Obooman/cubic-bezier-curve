@@ -150,7 +150,7 @@
 			ctx.stroke();
 
 			t += tSpeed;
-			if( t <= 1 ){
+			if( t <= 1 + tSpeed ){
 				requestAnimationFrame(draw);
 			} else {
 				redraw.removeAttribute('disabled');
